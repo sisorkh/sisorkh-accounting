@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='logo/favicon.ico') }}" type="image/x-icon">
+    <title>سیستم حسابداری نشر سی‌سرخ</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>📊 حسابداری نشر سی‌سرخ</h1>
+    </div>
+
+    <div class="content">
+        <!-- مدول‌ها -->
+        <div class="modules-grid">
+            <!-- مخاطب (لینک‌های فعال) -->
+            <div class="module-card">
+                <div class="module-title">👥 مخاطب</div>
+                <div class="button-group">
+                    <a href="/contact/view" class="btn btn-view">مشاهده</a>
+                    <a href="/contact/add" class="btn btn-add">افزودن</a>
+                </div>
+            </div>
+            <!-- کتاب -->
+						<div class="module-card">
+								<div class="module-title">📚 کتاب</div>
+								<div class="button-group">
+										<a href="/book/view" class="btn btn-view">مشاهده</a>
+										<a href="/book/add" class="btn btn-add">افزودن</a>
+								</div>
+						</div>
+            <!-- کالا -->
+						<div class="module-card">
+								<div class="module-title">📦 کالا</div>
+								<div class="button-group">
+										<a href="/goods/view" class="btn btn-view">مشاهده</a>
+										<a href="/goods/add" class="btn btn-add">افزودن</a>
+								</div>
+						</div>
+            <!-- انبار -->
+						<div class="module-card">
+								<div class="module-title">🏚️ انبار</div>
+								<div class="button-group">
+										<a href="/warehouse/view" class="btn btn-view">مشاهده</a>
+										<a href="/warehouse/add" class="btn btn-add">افزودن</a>
+								</div>
+						</div>
+            <!-- خرید -->
+            <div class="module-card">
+                <div class="module-title">🟢 خرید</div>
+                <div class="button-group">
+										<a href="/purchase/view" class="btn btn-view">مشاهده</a>
+										<a href="/purchase/add" class="btn btn-add">افزودن</a>
+                </div>
+            </div>
+            <!-- فروش -->
+            <div class="module-card">
+                <div class="module-title">🔴 فروش</div>
+                <div class="button-group">
+										<a href="/sales/view" class="btn btn-view">مشاهده</a>
+										<a href="/sales/add" class="btn btn-add">افزودن</a>
+                </div>
+            </div>
+            <!-- مالی -->
+						<div class="module-card">
+								<div class="module-title">💰 مالی</div>
+								<div class="button-group">
+										<a href="/financial/view" class="btn btn-view">مشاهده</a>
+										<a href="/financial/add" class="btn btn-add">افزودن</a>
+								</div>
+						</div>
+            <!-- جابجایی -->
+						<div class="module-card">
+								<div class="module-title">🔄 جابجایی</div>
+								<div class="button-group">
+										<a href="/transfer/view" class="btn btn-view">مشاهده</a>
+										<a href="/transfer/add" class="btn btn-add">افزودن</a>
+								</div>
+						</div>
+            <!-- هزینه -->
+						<div class="module-card">
+								<div class="module-title">📉 هزینه</div>
+								<div class="button-group">
+										<a href="/cost/view" class="btn btn-view">مشاهده</a>
+										<a href="/cost/add" class="btn btn-add">افزودن</a>
+								</div>
+						</div>
+            <!-- داده -->
+						<div class="module-card">
+								<div class="module-title">📋 داده</div>
+								<div class="button-group">
+										<a href="/list" class="btn btn-view">لیست</a>
+										<a href="/reckoning" class="btn btn-add">تسویه</a>
+								</div>
+						</div>
+            <!-- عملیات -->
+						<div class="module-card">
+								<div class="module-title">🔑 عملیات</div>
+								<div class="button-group">
+										<a href="/report" class="btn btn-view">گزارش</a>
+										<a href="/backup" class="btn btn-add">بک‌آپ</a>
+								</div>
+						</div>
+        </div>
+    </div>
+    <div class="footer">
+        {{ start_time|persian }}    </div>
+</div>
+
+<script>
+    // فقط دکمه‌های واقعی (<button>) را هدف قرار بده، لینک‌ها مزاحمتی ندارند
+    const realButtons = document.querySelectorAll('button.btn, .action-btn');
+    realButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const text = btn.innerText.trim();
+            if (text !== "خروج")
+                alert(`در حال اجرای: ${text}\n(بعداً منطق واقعی اضافه می‌شود)`);
+            else
+                alert('آیا می‌خواهید خارج شوید؟ (بعداً پیاده‌سازی می‌شود)');
+        });
+    });
+</script>
+</body>
+</html>

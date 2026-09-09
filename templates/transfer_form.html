@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>🔄 ثبت جابجایی جدید (انتقال بین انبارها)</h2>
+<form method="post" action="/transfer/add" id="transferForm">
+    <fieldset style="border:1px solid #ccc; padding:15px; margin-bottom:20px;">
+        <legend>اطلاعات جابجایی</legend>
+        <label>انبار مبدأ:</label><br>
+        <select name="source_warehouse" id="source_warehouse" required style="width:100%; margin-bottom:10px;">
+            <option value="">-- انتخاب کنید --</option>
+            {% for w in warehouses %}
+                <option value="{{ w.id }}">{{ w.contact_name }} (کد انبار: {{ w.id }})</option>
+            {% endfor %}
+        </select><br>
+        
+        <label>انبار مقصد:</label><br>
+        <select name="dest_warehouse" id="dest_warehouse" required style="width:100%; margin-bottom:10px;">
+            <option value="">-- انتخاب کنید --</option>
+            {% for w in warehouses %}
+                <option value="{{ w.id }}">{{ w.contact_name }} (کد انبار: {{ w.id }})</option>
+            {% endfor %}
+        </select><br>
+        
+        <label>توضیحات (اختیاری):</label><br>
+        <textarea name="description" rows="2" style="width:100%; margin-bottom:10px;"></textarea><br>
+        
+        <label><input type="checkbox" name="final" checked> فاکتور نهایی است (موجودی انبارها به‌روز می‌شود)</label>
+    </fieldset>
+    
+    <fieldset style="border:1px solid #ccc; padding:15px; margin-bottom:20px;">
+        <legend>کالاهای جابجا شده</legend>
+        <div style="overflow-x:auto;">
+            <table id="itemsTable" style="width:100%; border-collapse:collapse;">
+                <thead><tr><th>کالا</th><th>تعداد</th><th>قیمت واحد (تومان)</th><th>تخفیف (%)</th><th>مجموع</th><th>عملیات</th></tr></thead>
+                <tbody id="itemsBody"></tbody>
+                <tfoot>
+                    <tr><td colspan="5"><button type="button" id="addItemBtn" class="btn-add">➕ افزودن کالا</button></td></tr>
+                </tfoot>
+            </table>
+        </div>
+    </fieldset>
+    
+    <div style="text-align:center;">
+        <button type="submit" class="btn-add">💾 ثبت جابجایی</button>
+        <a href="/transfer/view" class="btn-view">🔙 بازگشت</a>
+    </div>
+</form>
+
+<script>
+    const goodsData = [
+        {% for g in goods %}
+        { id: {{ g.id }}, name: "{{ g.book_name }} (نوبت چاپ: {{ g.print_number }})", price: {{ g.sell_price }} },
+        {% endfor %}
+    ];
+    
+    function calculateRowTotal(row) {
+        const number = parseFloat(row.querySelector('.item-number').value) || 0;
+        const price = parseFloat(row.querySelector('.item-price').value) || 0;
+        const discount = parseFloat(row.querySelector('.item-discount').value) || 0;
+        const total = number * price * (1 - discount/100);
+        row.querySelector('.row-total').textContent = total.toLocaleString();
+        return total;
+    }
+    
+    function addItemRow(goodsId, numberVal, priceVal, discountVal) {
+        const tbody = document.getElementById('itemsBody');
+        const row = document.createElement('tr');
+        row.className = 'item-row';
+        row.innerHTML = `
+            <td><select name="goods_id[]" class="item-goods" required style="width:100%;">
+                <option value="">-- انتخاب کالا --</option>
+                ${goodsData.map(g => `<option value="${g.id}" data-price="${g.price}" ${g.id == goodsId ? 'selected' : ''}>${g.name}</option>`).join('')}
+            </select></td>
+            <td><input type="number" name="number[]" class="item-number" value="${numberVal || 1}" min="1" style="width:80px;"></td>
+            <td><input type="number" name="price[]" class="item-price" value="${priceVal || 0}" min="0" style="width:120px;"></td>
+            <td><input type="number" name="discount[]" class="item-discount" value="${discountVal || 0}" min="0" max="100" step="1" style="width:80px;"></td>
+            <td class="row-total" style="text-align:center;">0</td>
+            <td><button type="button" class="remove-row" style="background:#a00; color:white; border:none; padding:5px 10px;">حذف</button></td>
+        `;
+        const goodsSelect = row.querySelector('.item-goods');
+        const numberInput = row.querySelector('.item-number');
+        const priceInput = row.querySelector('.item-price');
+        const discountInput = row.querySelector('.item-discount');
+        const removeBtn = row.querySelector('.remove-row');
+        
+        goodsSelect.addEventListener('change', () => {
+            const opt = goodsSelect.options[goodsSelect.selectedIndex];
+            priceInput.value = opt.getAttribute('data-price') || 0;
+            calculateRowTotal(row);
+        });
+        numberInput.addEventListener('input', () => calculateRowTotal(row));
+        priceInput.addEventListener('input', () => calculateRowTotal(row));
+        discountInput.addEventListener('input', () => calculateRowTotal(row));
+        removeBtn.addEventListener('click', () => row.remove());
+        
+        tbody.appendChild(row);
+        calculateRowTotal(row);
+        if(goodsId) goodsSelect.dispatchEvent(new Event('change'));
+    }
+    
+    document.getElementById('addItemBtn').addEventListener('click', () => addItemRow(null, 1, 0, 0));
+    addItemRow(null, 1, 0, 0); // یک ردیف خالی
+    
+    document.getElementById('transferForm').addEventListener('submit', (e) => {
+        let valid = true;
+        document.querySelectorAll('.item-row').forEach(row => {
+            if(!row.querySelector('.item-goods').value) {
+                alert('لطفاً برای همه ردیف‌ها کالا انتخاب کنید.');
+                valid = false;
+                e.preventDefault();
+            }
+        });
+        const src = document.getElementById('source_warehouse').value;
+        const dst = document.getElementById('dest_warehouse').value;
+        if(src && dst && src === dst) {
+            alert('انبار مبدأ و مقصد نباید یکسان باشند.');
+            e.preventDefault();
+        }
+        if(src === "1" || dst === "1") {
+            // شرط برقرار است
+        } else {
+            alert('انبار ۱ (نشر اصلی) باید یکی از طرفین جابجایی باشد.');
+            e.preventDefault();
+        }
+    });
+</script>
+{% endblock %}

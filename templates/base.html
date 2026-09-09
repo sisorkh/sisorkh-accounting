@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <link rel="icon" href="{{ url_for('static', filename='logo/favicon.ico') }}" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم حسابداری</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery.dataTables.min.css') }}">
+    <script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.dataTables.min.js') }}"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="menu">
+            <a href="/" class="btn">خانه</a>
+            <a href="/report" class="btn">گزارش</a>
+            <a href="/backup" class="btn">بک‌آپ</a>
+        </div>
+        {% block content %}{% endblock %}
+    </div>
+</body>
+<script>
+$(document).ready(function () {
+    $('table').DataTable({
+        "language": {
+            "url": "{{ url_for('static', filename='json/fa.json') }}"
+        },
+        "columnDefs": [
+            { "type": "num", "targets": [0] }  // ستون اول عددی
+        ]
+    });
+});
+</script>
+</html>

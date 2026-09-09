@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>فاکتور جابجایی - {{ company.name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/invoice.css') }}">
+</head>
+<body>
+<div class="invoice-container">
+    <div class="invoice-header">
+        <div class="logo-area">
+            {% if company.logo_128 %}
+                <img src="{{ url_for('static', filename=company.logo_svg) }}" alt="لوگو">
+            {% endif %}
+        </div>
+        <div class="invoice-title">{{ transfer.title }}</div>
+        <div class="invoice-details">
+            <p><strong>شماره:</strong> {{ transfer.id|persian }}</p>
+            <p><strong>تاریخ:</strong> {{ date_shamsi|persian }}</p>
+            <!-- حذف انبار مبدأ و مقصد -->
+        </div>
+    </div>
+    <div class="print-datetime">زمان چاپ: {{ print_time|persian }}</div>
+    <div class="invoice-body">
+        <!-- اطلاعات طرف دوم -->
+        <div class="supplier-info">
+            <h4>اطلاعات خریدار</h4>
+            <p>
+                <strong>نام:</strong> {{ second_party.name }} |
+                {% if second_party.code == 1 %}   <!-- فقط برای حقوقی -->
+                    <strong>کد اقتصادی:</strong> {{ second_party.code or '---' }} |
+                {% endif %}
+                <strong>تلفن:</strong> {{ second_party.phone or '---' }} |
+                <strong>نشانی:</strong> {{ second_party.address or '---' }}
+            </p>
+        </div>
+
+        <table class="items-table">
+            <thead>
+                <tr><th>ردیف</th><th>عنوان</th><th>تعداد</th><th>قیمت واحد</th><th>تخفیف</th><th>قیمت نهایی</th></tr>
+                <tr><th class="unit"></th><th class="unit"></th><th class="unit">(جلد)</th><th class="unit">(تومان)</th><th class="unit">(درصد)</th><th class="unit">(تومان)</th></tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                {% set row_total = item.number * item.price * (1 - item.discount / 100) %}
+                <tr>
+                    <td>{{ loop.index|persian }}</td>
+                    <td>
+                        {{ item.book_name }}{% if item.book_second %} ({{ item.book_second }}){% endif %}
+                        <div class="product-details">
+                            {% if item.size == 0 %}رقعی
+                            {% elif item.size == 1 %}جیبی
+                            {% elif item.size == 2 %}پالتویی
+                            {% elif item.size == 3 %}وزیری
+                            {% elif item.size == 4 %}رحلی
+                            {% elif item.size == 5 %}نقلی
+                            {% elif item.size == 6 %}خشتی
+                            {% else %}نامشخص{% endif %}
+                            ، 
+                            {% if item.cover == 0 %}شومیز
+                            {% elif item.cover == 1 %}گالینگور
+                            {% elif item.cover == 2 %}شومیز قاب‌دار
+                            {% elif item.cover == 3 %}گالینگور قاب‌دار
+                            {% else %}نامشخص{% endif %}
+                            |
+                            چاپ {{ item.print_number|persian }}
+                        </div>
+                    </td>
+                    <td>{{ item.number|persian }}</td>
+                    <td>{{ item.price|format_number }}</td>
+                    <td>{{ item.discount|format_discount }}</td>
+                    <td>{{ row_total|int|format_number }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="totals">
+            <div><strong>جمع کتاب‌ها:</strong> {{ total_item|format_number }} جلد</div>
+            <div class="grand-total"><strong>جمع کل:</strong> {{ total|format_number }} تومان</div>
+        </div>
+    </div>
+
+    <div class="invoice-footer">
+        <p><strong>{{ company.name }}</strong> | {{ company.address|persian }} | تماس: {{ company.mobile|persian }}</p>
+        <div class="bank-accounts">
+            {% for bank, acc in company.accounts.items() %}
+                <span>{{ bank }}: {{ acc|persian }}</span>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="print-button">
+    <button onclick="window.print();">🖨️ چاپ فاکتور</button>
+    <button onclick="window.location.href='/transfer/view'">🔙 بازگشت به لیست</button>
+</div>
+</body>
+</html>

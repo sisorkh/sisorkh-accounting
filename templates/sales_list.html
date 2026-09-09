@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+{% from 'macros/date.html' import date_filter %}
+{% from 'macros/werehouse.html' import werehouse_filter %}
+<h2>📤 لیست فاکتورهای فروش</h2>
+<a href="/sales/add" class="btn-add">➕ ثبت فروش جدید</a>
+<div>
+{{ date_filter(start_year=start_year, start_month=start_month, start_day=start_day,
+                end_year=end_year, end_month=end_month, end_day=end_day) }}
+{{ werehouse_filter(warehouses=warehouses, selected_warehouse=warehouse_id) }}
+</div>
+<table style="width:100%; margin-top:20px;">
+    <thead>
+        <tr><th>شماره</th><th>خریدار</th><th>انبار</th><th>تاریخ</th><th>نهایی</th><th>اقلام</th><th>عملیات</th></tr>
+    </thead>
+    <tbody>
+        {% for s in sales %}
+        <tr>
+            <td>{{ s.id|persian }}</td>
+            <td>{{ s.contact_name }}</td>
+            <td>{% if s.werehouse == 0 %}مجازی{% else %}{{ s.werehouse|persian }}{% endif %}</td>
+            <td>{{ s.date_shamsi|persian }}</td>
+            <td>{% if s.final %}بله{% else %}پیش‌فاکتور{% endif %}</td>
+            <td>{{ s.items_count|persian }}</td>
+            <td><a href="/sales/invoice/{{ s.id }}">مشاهده فاکتور</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

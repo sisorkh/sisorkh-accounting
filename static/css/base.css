@@ -1,0 +1,14 @@
+@font-face {
+    font-family: Vazir;
+    src: url('../font/Vazir.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+body { font-family: Vazir, Tahoma, sans-serif; margin: 20px; background: #f4f4f4; }
+.container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
+button, .btn { background: #007bff; color: white; border: none; padding: 10px 20px; margin: 5px; cursor: pointer; border-radius: 5px; text-decoration: none; display: inline-block; }
+button:hover, .btn:hover { background: #0056b3; }
+table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+th, td {border: 1px solid #ddd; padding: 8px; text-align: right; }
+th { background-color: #007bff; color: white; }
+.menu { margin-bottom: 20px; }

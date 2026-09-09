@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>{% if contact %}✏️ ویرایش مخاطب{% else %}➕ افزودن مخاطب جدید{% endif %}</h2>
+<form method="post" action="/contact/add" style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px; background: #f9fafc; padding: 20px; border-radius: 16px;">
+    {% if contact %}
+        <input type="hidden" name="id" value="{{ contact.id }}">
+    {% endif %}
+    
+    <label for="type">نوع مخاطب:</label>
+    <select name="type" id="type" required>
+        <option value="0" {% if contact and contact.type == 0 %}selected{% endif %}>حقیقی</option>
+        <option value="1" {% if contact and contact.type == 1 %}selected{% endif %}>حقوقی</option>
+        <option value="2" {% if contact and contact.type == 2 %}selected{% endif %}>سایر</option>
+    </select>
+    
+    <label for="name">نام:</label>
+    <input type="text" name="name" id="name" value="{{ contact.name if contact else '' }}" placeholder="مثال: علی محمدی" required>
+    
+    <label for="father">نام پدر:</label>
+    <input type="text" name="father" id="father" value="{{ contact.father if contact else '' }}" placeholder="مثال: احمد">
+    
+    <label for="year">سال تولد:</label>
+    <input type="text" name="year" id="year" value="{{ contact.year if contact else '' }}" placeholder="مثال: 1373" inputmode="numeric">
+    
+    <label for="code">کد ملی:</label>
+    <input type="text" name="code" id="code" value="{{ contact.code if contact else '' }}" placeholder="مثال: 0017171717" inputmode="numeric">
+    
+    <label for="booklet">شماره شناسنامه:</label>
+    <input type="text" name="booklet" id="booklet" value="{{ contact.booklet if contact else '' }}" placeholder="مثال: 51518" inputmode="numeric">
+    
+    <label for="mobile">شماره موبایل:</label>
+    <input type="text" name="mobile" id="mobile" value="{{ contact.mobile if contact else '' }}" placeholder="مثال: 9852652525" inputmode="numeric">
+    
+    <label for="phone">شماره تلفن:</label>
+    <input type="text" name="phone" id="phone" value="{{ contact.phone if contact else '' }}" placeholder="مثال: 9821555555" inputmode="numeric">
+    
+    <label for="address">نشانی:</label>
+    <textarea name="address" id="address" rows="2" placeholder="تهران، میدان انقلاب، ...">{{ contact.address if contact else '' }}</textarea>
+    
+    <label for="postal">کد پستی:</label>
+    <input type="text" name="postal" id="postal" value="{{ contact.postal if contact else '' }}" placeholder="مثال: 788787844" inputmode="numeric">
+    
+    <label for="account">شماره شبا:</label>
+    <input type="text" name="account" id="account" value="{{ contact.account if contact else '' }}" placeholder="مثال: IR324243243252525">
+    
+    <label for="email">ایمیل:</label>
+    <input type="email" name="email" id="email" value="{{ contact.email if contact else '' }}" placeholder="example@domain.com">
+    
+    <div style="grid-column: span 2; display: flex; gap: 20px; justify-content: center; margin-top: 20px;">
+        <button type="submit" class="btn-add">💾 ذخیره</button>
+        <a href="/contact/view" class="btn-view">🔙 بازگشت</a>
+    </div>
+</form>
+{% endblock %}

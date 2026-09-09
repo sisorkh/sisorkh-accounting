@@ -1,0 +1,20 @@
+{% macro werehouse_filter( warehouses=[], selected_warehouse='') %}
+<form method="get" action="{{ request.path }}" 
+      style="margin-bottom:20px; display:inline-block; gap:20px; align-items: flex-end; flex-wrap: wrap; background: #f9f9f9; padding:15px; border-radius:8px;">   
+    <div>
+        <label>انبار:</label>
+        <select name="warehouse_id" style="padding:5px; width:150px;">
+            <option value="">همه انبارها</option>
+            {% for w in warehouses %}
+                <option value="{{ w.id }}" {% if selected_warehouse|string == w.id|string %}selected{% endif %}>
+                    {{ w.contact_name }} (کد {{ w.id }})
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div>
+        <button type="submit" class="btn">🔍 فیلتر</button>
+        <a href="{{ request.path }}">❌ حذف فیلتر</a>
+    </div>
+</form>
+{% endmacro %}

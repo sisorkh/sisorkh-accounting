@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>💰 لیست تراکنش‌های مالی</h2>
+<a href="/financial/add" class="btn-add">➕ ثبت تراکنش جدید</a>
+<table style="width:100%; margin-top:20px; border-collapse:collapse;">
+    <thead>
+        <tr>
+            <th>شناسه</th><th>مخاطب</th><th>نوع</th><th>مبلغ (تومان)</th><th>تاریخ (شمسی)</th><th>عملیات</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for t in transactions %}
+        <tr>
+            <td>{{ t.id|persian }}</td>
+            <td>{{ t.contact_name }} (کد {{ t.contact|persian }})</td>
+            <td>
+                {% if t.amount < 0 %}
+                    پرداخت
+                {% else %}
+                    دریافت
+                {% endif %}
+            </td>
+            <td style="{% if t.amount < 0 %}color:red;{% else %}color:green;{% endif %}">
+                {{ t.amount|abs|format_number }}  <!-- مقدار مطلق -->
+            </td>
+            <td>{{ t.date_shamsi|persian }}</td>
+            <td><a href="#">جزئیات (بعداً)</a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6">هیچ تراکنشی ثبت نشده است. یک تراکنش جدید اضافه کنید.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

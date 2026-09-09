@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>💰 لیست قیمت‌های خرید و فروش</h2>
+<p>در این صفحه می‌توانید قیمت خرید و فروش هر کالا را ویرایش کنید. پس از تغییر، روی دکمه «ذخیره همه تغییرات» کلیک کنید.</p>
+
+<form method="post" action="/list" id="priceForm">
+    <table style="width:100%; margin-top:20px; border-collapse:collapse;">
+        <thead>
+            <tr>
+                <th>F</th>
+                <th>کد</th>
+                <th>عنوان</th>
+                <th>مشخصات</th>
+                <th>خرید</th>
+                <th>فروش</th>
+                <th>اس‌کی‌یو</th>
+                <th>به‌روزرسانی</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td><input type="checkbox" name="force_{{ item.goods_id }}"></td>
+                <td>{{ item.goods_id|persian }}</td>
+                <td>{{ item.book_name }}</td>
+                <td>
+                    {% if item.size == 0 %}رقعی
+                    {% elif item.size == 1 %}جیبی
+                    {% elif item.size == 2 %}پالتویی
+                    {% elif item.size == 3 %}وزیری
+                    {% elif item.size == 4 %}رحلی
+                    {% elif item.size == 5 %}نقلی
+                    {% elif item.size == 6 %}خشتی
+                    {% else %}نامشخص{% endif %}
+                    {% if item.cover == 0 %}شومیز
+                    {% elif item.cover == 1 %}گالینگور
+                    {% elif item.cover == 2 %}شومیز قاب‌دار
+                    {% elif item.cover == 3 %}گالینگور قاب‌دار
+                    {% else %}نامشخص{% endif %}
+                    {{ item.print_number|persian }}
+                </td>
+                <td>
+                    <input type="number" name="buy_price" value="{{ item.buy }}" class="buy-input" data-goods="{{ item.goods_id }}" style="width:120px;">
+                    <input type="hidden" name="goods_id" value="{{ item.goods_id }}">
+                </td>
+                <td>
+                    <input type="number" name="sell_price" value="{{ item.sell }}" class="sell-input" data-goods="{{ item.goods_id }}" style="width:120px;">
+                </td>
+                <td>
+                    <input type="text" name="sku" value="{{ item.sku }}" style="width:100px;">
+                </td>
+                <td>{{ item.date_shamsi|persian }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div style="margin-top:20px; text-align:center;">
+        <button type="submit" class="btn-add">💾 ذخیره همه تغییرات</button>
+        <a href="/" class="btn-view">🔙 بازگشت به صفحه اصلی</a>
+    </div>
+</form>
+
+<script>
+    // وقتی کاربر مقداری را تغییر می‌دهد، می‌توانید پیام یا تغییر رنگ ایجاد کنید (اختیاری)
+    const inputs = document.querySelectorAll('.buy-input, .sell-input');
+    inputs.forEach(input => {
+        input.addEventListener('change', function() {
+            this.style.backgroundColor = '#fff3cd';  // زرد کمرنگ برای نشان دادن تغییر
+        });
+    });
+
+    // قبل از submit می‌توانید بررسی کنید (اختیاری)
+    document.getElementById('priceForm').addEventListener('submit', function(e) {
+        // در صورت نیاز اعتبارسنجی
+    });
+</script>
+{% endblock %}

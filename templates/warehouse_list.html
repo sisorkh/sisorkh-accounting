@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>🏚️ لیست انبارها</h2>
+<a href="/warehouse/add" class="btn-add">➕ افزودن انبار جدید</a>
+<table>
+    <thead>
+        <tr><th>شناسه انبار</th><th>مخاطب</th><th>عملیات</th></tr>
+    </thead>
+    <tbody>
+        {% for w in warehouses %}
+        <tr>
+            <td>{{ w.id }}</td>
+            <td>{{ w.contact_name }} (کد: {{ w.contact }})</td>
+            <td><a href="#">جزئیات (بعداً)</a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3">هیچ انباری ثبت نشده است. یک انبار جدید اضافه کنید.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

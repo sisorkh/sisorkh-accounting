@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>لیست مشتریان</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>شناسه</th>
+                <th>نام مشتری</th>
+                <th>عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+            <tr>
+                <td>{{ customer.id }}</td>
+                <td>{{ customer.name }}</td>
+                <td><a href="#">ویرایش</a></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3">هیچ مشتری‌ای یافت نشد.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <h3>افزودن مشتری جدید</h3>
+    <form method="post" action="/add_customer">
+        <input type="text" name="name" placeholder="نام مشتری" required>
+        <button type="submit">ثبت</button>
+    </form>
+{% endblock %}

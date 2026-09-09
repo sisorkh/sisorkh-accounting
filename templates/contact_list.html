@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>📋 لیست مخاطبان</h2>
+<a href="/contact/add" class="btn-add">➕ افزودن مخاطب جدید</a>
+<table style="margin-top: 20px;">
+    <thead>
+        <tr><th>شناسه</th><th>نوع</th><th>نام</th><th>نام پدر</th><th>موبایل</th><th>عملیات</th></tr>
+    </thead>
+    <tbody>
+        {% for c in contacts %}
+        <tr>
+            <td>{{ c.id|persian }}</td>
+            <td>
+                {% if c.type == 0 %}حقیقی
+                {% elif c.type == 1 %}حقوقی
+                {% else %}سایر{% endif %}
+            </td>
+            <td>{{ c.name }}</td>
+            <td>{{ c.father }}</td>
+            <td>{{ c.mobile }}</td>
+            <td>
+                <a href="/contact/edit/{{ c.id }}">ویرایش</a>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6">هیچ مخاطبی یافت نشد. یک مخاطب جدید اضافه کنید.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

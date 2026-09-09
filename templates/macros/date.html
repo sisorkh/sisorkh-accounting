@@ -1,0 +1,25 @@
+{% macro date_filter(start_year='', start_month='', start_day='', end_year='', end_month='', end_day='') %}
+<form method="get" action="{{ request.path }}" style="margin-bottom:20px; display:inline-block; gap:20px; align-items: flex-end; flex-wrap: wrap; background: #f9f9f9; padding:15px; border-radius:8px;">
+    <div>
+        <div style="display: flex; gap:5px;">
+            <label>از:</label>
+            <input type="text" name="start_day" placeholder="روز" size="2" maxlength="2" value="{{ start_day }}" style="width:50px; text-align:center;">
+            <input type="text" name="start_month" placeholder="ماه" size="2" maxlength="2" value="{{ start_month }}" style="width:50px; text-align:center;">
+            <input type="text" name="start_year" placeholder="سال" size="4" maxlength="4" value="{{ start_year }}" style="width:70px; text-align:center;">
+        </div>
+    </div>
+    <div>
+        <div style="display: flex; gap:5px;">
+            <label>تا:</label>
+            <input type="text" name="end_day" placeholder="روز" size="2" maxlength="2" value="{{ end_day }}" style="width:50px; text-align:center;">
+            <input type="text" name="end_month" placeholder="ماه" size="2" maxlength="2" value="{{ end_month }}" style="width:50px; text-align:center;">
+            <input type="text" name="end_year" placeholder="سال" size="4" maxlength="4" value="{{ end_year }}" style="width:70px; text-align:center;">
+
+        </div>
+    </div>
+    <div>
+        <button type="submit" class="btn">🔍 فیلتر</button>
+        <a href="{{ request.path }}">❌ حذف فیلتر تاریخ</a>
+    </div>
+</form>
+{% endmacro %}

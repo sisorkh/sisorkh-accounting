@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>➕ افزودن کتاب جدید</h2>
+<form method="post" action="/book/add" id="bookForm">
+    <fieldset style="border:1px solid #ccc; padding:15px; margin-bottom:20px;">
+        <legend>اطلاعات کتاب</legend>
+        <label>عنوان اصلی (ضروری):</label><br>
+        <input type="text" name="name" required style="width:100%; margin-bottom:10px;"><br>
+        <label>عنوان فرعی (اختیاری):</label><br>
+        <input type="text" name="second" style="width:100%; margin-bottom:10px;"><br>
+        <label>سال انتشار:</label><br>
+        <input type="number" name="year" value="{{ default_year }}" style="width:100%; margin-bottom:10px;">
+    </fieldset>
+
+    <label>روش محاسبه:</label><br>
+    <select name="share_type" required style="width:100%; margin-bottom:10px;">
+        <option value="0">سود خالص</option><option value="1">پشت جلد</option><option value="2">یکجا</option>
+    </select><br>
+
+    <fieldset id="sharesFieldset" style="border:1px solid #ccc; padding:15px;">
+        <legend>📊 سهام مؤلفان</legend>
+        <div id="sharesContainer">
+            <div class="share-row" style="display: flex; gap:10px; margin-bottom:10px;">
+                <select name="contact_id[]" class="contact-select" style="flex:2;" required>
+                    <option value="">-- انتخاب مخاطب --</option>
+                    {% for c in contacts %}
+                    <option value="{{ c.id }}">{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+                <input type="number" step="any" name="share[]" class="share-input" placeholder="درصد سهم" style="flex:1;" required>
+                <button type="button" class="remove-row" style="background:#a00; color:white; border:none; padding:0 10px;">❌</button>
+            </div>
+        </div>
+        <button type="button" id="addShareRow" style="margin-top:10px;">➕ افزودن مؤلف دیگر</button>
+        <p id="totalShareMsg" style="margin-top:10px; font-weight:bold;">مجموع سهم: 0%</p>
+    </fieldset>
+    
+    <div style="margin-top:20px; text-align:center;">
+        <button type="submit" class="btn-add">💾 ذخیره کتاب و سهم‌ها</button>
+        <a href="/book/view" class="btn-view">🔙 بازگشت</a>
+    </div>
+</form>
+
+<script>
+    // گرفتن لیست مخاطبان از قبل درون template (contacts) موجود است
+    // اما برای clone نیاز به option‌ها داریم، بهتر است یک template از select بسازیم
+    const contactOptions = `{% for c in contacts %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}`;
+    
+    function updateTotalShare() {
+        let total = 0;
+        document.querySelectorAll('.share-input').forEach(input => {
+            let val = parseFloat(input.value);
+            if (!isNaN(val)) total += val;
+        });
+        document.getElementById('totalShareMsg').innerText = `مجموع سهم: ${total}%`;
+        if (total > 100) {
+            document.getElementById('totalShareMsg').style.color = 'red';
+        } else {
+            document.getElementById('totalShareMsg').style.color = 'green';
+        }
+    }
+    
+    function createShareRow(selectedContactId = '', shareValue = '') {
+        const div = document.createElement('div');
+        div.className = 'share-row';
+        div.style.display = 'flex';
+        div.style.gap = '10px';
+        div.style.marginBottom = '10px';
+        
+        const select = document.createElement('select');
+        select.name = 'contact_id[]';
+        select.className = 'contact-select';
+        select.style.flex = '2';
+        select.required = true;
+        select.innerHTML = `<option value="">-- انتخاب مخاطب --</option>${contactOptions}`;
+        if (selectedContactId) select.value = selectedContactId;
+        
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.step = 'any';
+        input.name = 'share[]';
+        input.className = 'share-input';
+        input.placeholder = 'درصد سهم';
+        input.style.flex = '1';
+        input.required = true;
+        if (shareValue) input.value = shareValue;
+        input.addEventListener('input', updateTotalShare);
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'remove-row';
+        removeBtn.style.background = '#a00';
+        removeBtn.style.color = 'white';
+        removeBtn.style.border = 'none';
+        removeBtn.style.padding = '0 10px';
+        removeBtn.innerText = '❌';
+        removeBtn.onclick = function() { div.remove(); updateTotalShare(); };
+        
+        div.appendChild(select);
+        div.appendChild(input);
+        div.appendChild(removeBtn);
+        return div;
+    }
+    
+    document.getElementById('addShareRow').addEventListener('click', function() {
+        const container = document.getElementById('sharesContainer');
+        container.appendChild(createShareRow());
+    });
+    
+    // اضافه کردن event listener به موجودها
+    document.querySelectorAll('.share-input').forEach(inp => inp.addEventListener('input', updateTotalShare));
+    document.querySelectorAll('.remove-row').forEach(btn => {
+        btn.onclick = function() { btn.parentElement.remove(); updateTotalShare(); };
+    });
+    
+    // قبل از submit بررسی نهایی
+    document.getElementById('bookForm').addEventListener('submit', function(e) {
+        let total = 0;
+        document.querySelectorAll('.share-input').forEach(inp => {
+            let val = parseFloat(inp.value);
+            if (!isNaN(val)) total += val;
+        });
+        if (total > 100) {
+            e.preventDefault();
+            alert('مجموع سهم‌ها از ۱۰۰ بیشتر است. لطفاً اصلاح کنید.');
+        } else if (total === 0) {
+            // می‌توانیم اجازه دهیم یا اخطار دهیم (سهم صفر مجاز است؟ احتمالاً نه)
+            if (!confirm('مجموع سهم‌ها صفر است. آیا مطمئن هستید؟')) {
+                e.preventDefault();
+            }
+        }
+    });
+    
+    // زمانی که صفحه بارگذاری شد، مجموع اولیه محاسبه شود
+    window.addEventListener('DOMContentLoaded', updateTotalShare);
+</script>
+{% endblock %}

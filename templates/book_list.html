@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>📚 لیست کتاب‌ها</h2>
+<a href="/book/add" class="btn-add">➕ افزودن کتاب جدید</a>
+<table>
+    <thead>
+        <tr><th>کد</th><th>عنوان اصلی</th><th>عنوان فرعی</th><th>سال</th><th>نوع</th><th>سهام</th>><th>چاپی</th>><th>الکترونیکی</th>><th>صوتی</th><th>POD</th><th>عملیات</th></tr>
+    </thead>
+    <tbody>
+        {% for b in books %}
+        <tr>
+            <td>{{ b.id|persian }}</td>
+            <td>{{ b.name }}</td>
+            <td>{{ b.second or '-' }}</td>
+            <td>{{ b.year|persian }}</td>
+            <td>{{ b.share_type|persian }}</td>
+            <td>{{ b.total_share|format_discount }}</td>
+            <td>{{ b.print|persian }}</td>
+            <td>{{ b.electronic|persian }}</td>
+            <td>{{ b.audio|persian }}</td>
+            <td>{{ b.pod|persian }}</td>
+            <td><a href="#">جزئیات (بعداً)</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

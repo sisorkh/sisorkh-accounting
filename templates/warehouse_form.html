@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>➕ افزودن انبار جدید</h2>
+<form method="post" action="/warehouse/add" style="max-width: 500px; margin: 20px auto; background: #f9fafc; padding: 20px; border-radius: 16px;">
+    <label for="contact">مخاطب (فقط مخاطبانی که انبار ندارند قابل انتخاب هستند):</label>
+    <select name="contact" id="contact" required style="width: 100%; padding: 8px; margin: 10px 0;">
+        <option value="">-- انتخاب کنید --</option>
+        {% for c in contacts %}
+        <option value="{{ c.id }}">{{ c.name }} (کد {{ c.id }})</option>
+        {% endfor %}
+    </select>
+    <div style="display: flex; gap: 20px; justify-content: center; margin-top: 20px;">
+        <button type="submit" class="btn-add">💾 ذخیره انبار</button>
+        <a href="/warehouse/view" class="btn-view">🔙 بازگشت</a>
+    </div>
+</form>
+{% if contacts|length == 0 %}
+    <p style="color: red;">⚠️ هیچ مخاطبی بدون انبار وجود ندارد. ابتدا مخاطب جدید اضافه کنید یا انبارهای موجود را حذف کنید.</p>
+{% endif %}
+{% endblock %}

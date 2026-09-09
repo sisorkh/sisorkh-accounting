@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>📥 لیست فاکتورهای خرید</h2>
+<a href="/purchase/add" class="btn-add">➕ ثبت خرید جدید</a>
+<table>
+    <thead><tr><th>شماره</th><th>تأمین‌کننده</th><th>انبار</th><th>تاریخ</th><th>نهایی</th><th>اقلام</th><th>عملیات</th></tr></thead>
+    <tbody>
+        {% for inv in purchases %}
+        <tr>
+            <td>{{ inv.id|persian }}</td>
+            <td>{{ inv.contact_name }}</td>
+            <td>{{ inv.werehouse|persian }}</td>
+            <td>{{ inv.date_shamsi|persian }}</td>
+            <td>{% if inv.final %}بله{% else %}پیش‌فاکتور{% endif %}</td>
+            <td>{{ inv.items_count|persian }}</td>
+            <td>
+                <a href="/purchase/invoice/{{ inv.id }}" target="_blank">📄 مشاهده فاکتور</a>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7">هیچ فاکتور خریدی ثبت نشده است.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

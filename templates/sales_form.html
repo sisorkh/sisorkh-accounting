@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>📤 ثبت فروش جدید</h2>
+<form method="post" action="/sales/add" id="salesForm">
+    <fieldset style="border:1px solid #ccc; padding:15px; margin-bottom:20px;">
+        <legend>اطلاعات فاکتور فروش</legend>
+        <label>مخاطب (خریدار):</label><br>
+        <select name="contact" required style="width:100%; margin-bottom:10px;">
+            <option value="">-- انتخاب کنید --</option>
+            {% for c in contacts %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+        </select><br>
+        
+        <label>انبار:</label><br>
+        <select name="warehouse" id="warehouseSelect" required style="width:100%; margin-bottom:10px;">
+            <option value="">-- انتخاب کنید --</option>
+            <option value="0">📱 انبار مجازی (الکترونیک/صوتی)</option>
+            {% for w in warehouses %}
+                <option value="{{ w.id }}">{{ w.contact_name }} (انبار کد {{ w.id }})</option>
+            {% endfor %}
+        </select><br>
+        
+        <label>روش ارسال:</label><br>
+        <select name="shipping_method" required style="width:100%; margin-bottom:10px;">
+            <option value="0">حضوری</option><option value="1">پست</option><option value="2">باربری/پخش</option>
+            <option value="3">پیک</option><option value="4">سایر</option>
+        </select><br>
+        
+        <label>هزینه ارسال (تومان):</label><br>
+        <input type="number" name="shipping_cost" value="0" style="width:100%; margin-bottom:10px;"><br>
+        
+        <label>توضیحات (اختیاری):</label><br>
+        <textarea name="description" rows="2" style="width:100%; margin-bottom:10px;"></textarea><br>
+        
+        <label><input type="checkbox" name="final" checked>فاکتور نهایی</label>
+        <label><input type="checkbox" name="register_payment" checked>ثبت پرداخت</label>
+        <label><input type="checkbox" name="contribution"> سهم مؤلف</label>
+    </fieldset>
+    
+    <fieldset style="border:1px solid #ccc; padding:15px; margin-bottom:20px;">
+        <legend>کالاهای فروخته شده</legend>
+        <div style="overflow-x:auto;">
+            <table id="itemsTable" style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr>
+                        <th>کالا</th>
+                        <th>موجودی انبار</th>
+                        <th>تعداد</th>
+                        <th>قیمت واحد (تومان)</th>
+                        <th>تخفیف (%)</th>
+                        <th>مجموع</th>
+                        <th>عملیات</th>
+                    </tr>
+                </thead>
+                <tbody id="itemsBody"></tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="6">
+                            <button type="button" id="addItemBtn" class="btn-add">➕ افزودن کالا</button>
+                        </td>
+                        <td><span id="totalItemsAmount">0</span> تومان</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </fieldset>
+    
+    <div style="text-align:center;">
+        <button type="submit" class="btn-add">💾 ثبت فاکتور فروش</button>
+        <a href="/sales/view" class="btn-view">🔙 بازگشت</a>
+    </div>
+</form>
+
+<script>
+    // داده‌های موجودی ارسال شده از سرور
+    const inventoryData = {{ inventory_data|tojson|safe }};
+    const buyPrices = {{ buy_prices|tojson|safe }};
+    
+    const physicalGoods = [
+        {% for g in physical_goods %}
+        { id: "{{ g.id }}", name: "{{ g.book_name }} (نوبت چاپ: {{ g.print_number }})", price: {{ g.sell_price }}, type: 0 },
+        {% endfor %}
+    ];
+    const virtualGoods = [
+        {% for vg in virtual_goods %}
+        { id: "{{ vg.id }}", name: "{{ vg.book_name }}", price: {{ vg.sell_price }}, type: {{ vg.type }} },
+        {% endfor %}
+    ];
+    
+    let currentGoodsData = [];
+    let currentInventory = {};  // برای انبار فیزیکی فعلی
+
+    function updateTotalAmount() {
+        let total = 0;
+        document.querySelectorAll('#itemsBody .item-row').forEach(row => {
+            const number = parseFloat(row.querySelector('.item-number').value) || 0;
+            const price = parseFloat(row.querySelector('.item-price').value) || 0;
+            const discount = parseFloat(row.querySelector('.item-discount').value) || 0;
+            total += number * price * (1 - discount / 100);
+        });
+        document.getElementById('totalItemsAmount').innerText = total.toLocaleString();
+    }
+    function loadGoodsForWarehouse(warehouseId) {
+        if (warehouseId == "0") {
+            currentGoodsData = virtualGoods;
+            currentInventory = {};
+        } else {
+            currentGoodsData = physicalGoods;
+            currentInventory = inventoryData[warehouseId] || {};
+        }
+        // به روز رسانی ردیف‌های موجود
+        document.querySelectorAll('.item-row').forEach(row => {
+            const goodsSelect = row.querySelector('.item-goods');
+            const stockSpan = row.querySelector('.stock-display');
+            const currentVal = goodsSelect.value;
+            // بازسازی options
+            goodsSelect.innerHTML = '<option value="">-- انتخاب کالا --</option>' + 
+                currentGoodsData.map(g => `<option value="${g.id}" data-price="${g.price}" data-type="${g.type}">${g.name}</option>`).join('');
+            if (currentVal && currentGoodsData.some(g => g.id == currentVal)) {
+                goodsSelect.value = currentVal;
+                goodsSelect.dispatchEvent(new Event('change'));
+            } else {
+                goodsSelect.value = "";
+                if (stockSpan) stockSpan.innerText = "0";
+                row.querySelector('.item-price').value = 0;
+                row.querySelector('.row-total').textContent = "0";
+            }
+        });
+    }
+    
+    function calculateRowTotal(row) {
+        const number = parseFloat(row.querySelector('.item-number').value) || 0;
+        const price = parseFloat(row.querySelector('.item-price').value) || 0;
+        const discount = parseFloat(row.querySelector('.item-discount').value) || 0;
+        const total = number * price * (1 - discount/100);
+        row.querySelector('.row-total').textContent = total.toLocaleString();
+        return total;
+    }
+    
+    function addItemRow(goodsIdVal, numberVal, priceVal, discountVal) {
+        const tbody = document.getElementById('itemsBody');
+        const row = document.createElement('tr');
+        row.className = 'item-row';
+        row.innerHTML = `
+            <td>
+                <select name="goods_id[]" class="item-goods" required style="width:100%;">
+                    <option value="">-- انتخاب کالا --</option>
+                    ${currentGoodsData.map(g => `<option value="${g.id}" data-price="${g.price}" data-type="${g.type}">${g.name}</option>`).join('')}
+                </select>
+                <input type="hidden" name="type[]" class="item-type" value="">
+            </td>
+            <td class="stock-display" style="text-align:center;">0</td>
+            <td><input type="number" name="number[]" class="item-number" value="${numberVal || 1}" min="1" style="width:80px;"></td>
+            <td><input type="number" name="price[]" class="item-price" value="${priceVal || 0}" min="0" style="width:120px;"></td>
+            <td><input type="number" name="discount[]" class="item-discount" value="${discountVal || 0}" min="0" max="100" step="1" style="width:80px;"></td>
+            <td class="row-total" style="text-align:center;">0</td>
+            <td>
+                <button type="button" class="set-buy-price" style="background:#2b6e5c; color:white; border:none; padding:5px 10px; border-radius:4px; margin-left:5px;">قیمت خرید</button>
+                <button type="button" class="remove-row" style="background:#a00; color:white; border:none; padding:5px 10px; border-radius:4px;">حذف</button>
+            </td>
+        `;
+        const goodsSelect = row.querySelector('.item-goods');
+        const typeHidden = row.querySelector('.item-type');
+        const stockSpan = row.querySelector('.stock-display');
+        const numberInput = row.querySelector('.item-number');
+        const priceInput = row.querySelector('.item-price');
+        const discountInput = row.querySelector('.item-discount');
+        const removeBtn = row.querySelector('.remove-row');
+        const buyPriceBtn = row.querySelector('.set-buy-price');
+        buyPriceBtn.addEventListener('click', () => {
+            const selectedOption = goodsSelect.options[goodsSelect.selectedIndex];
+            const goodsId = selectedOption.value;
+            if (goodsId && buyPrices[goodsId] !== undefined) {
+                const buyPrice = buyPrices[goodsId];
+                priceInput.value = buyPrice;
+                calculateRowTotal(row);
+            } else {
+                alert('قیمت خرید برای این کالا ثبت نشده است.');
+            }
+        });
+        
+        goodsSelect.addEventListener('change', () => {
+            const opt = goodsSelect.options[goodsSelect.selectedIndex];
+            const price = opt.getAttribute('data-price') || 0;
+            const type = opt.getAttribute('data-type') || 0;
+            const goodsId = opt.value;
+            priceInput.value = price;
+            typeHidden.value = type;
+            if (stockSpan && currentInventory) {
+                const stock = currentInventory[goodsId] || 0;
+                stockSpan.innerText = stock;
+            }
+            calculateRowTotal(row);
+            updateTotalAmount();
+        });
+        numberInput.addEventListener('input', () => {calculateRowTotal(row);updateTotalAmount();});
+        priceInput.addEventListener('input', () => {calculateRowTotal(row);updateTotalAmount();});
+        discountInput.addEventListener('input', () => {calculateRowTotal(row);updateTotalAmount();});
+        removeBtn.addEventListener('click', () => {row.remove();updateTotalAmount();});
+        
+        tbody.appendChild(row);
+        calculateRowTotal(row);
+        if(goodsIdVal) {
+            goodsSelect.value = goodsIdVal;
+            goodsSelect.dispatchEvent(new Event('change'));
+        } else {
+            goodsSelect.dispatchEvent(new Event('change'));
+        }
+    }
+    
+    document.getElementById('warehouseSelect').addEventListener('change', (e) => {
+        loadGoodsForWarehouse(e.target.value);
+    });
+    
+    document.getElementById('addItemBtn').addEventListener('click', () => addItemRow(null, 1, 0, 0));
+    addItemRow(null, 1, 0, 0); // یک ردیف خالی اولیه
+    
+    // بارگذاری اولیه (هیچ انباری انتخاب نشده)
+    loadGoodsForWarehouse('');
+    
+    document.getElementById('salesForm').addEventListener('submit', (e) => {
+        let valid = true;
+        document.querySelectorAll('.item-row').forEach(row => {
+            if(!row.querySelector('.item-goods').value) {
+                alert('لطفاً برای همه ردیف‌ها کالا انتخاب کنید.');
+                valid = false;
+                e.preventDefault();
+            }
+        });
+        const warehouse = document.getElementById('warehouseSelect').value;
+        if(warehouse === "") {
+            alert('لطفاً انبار را انتخاب کنید.');
+            e.preventDefault();
+        }
+    });
+</script>
+{% endblock %}

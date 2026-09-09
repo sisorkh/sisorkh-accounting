@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>💰 ثبت تراکنش مالی جدید</h2>
+<form method="post" action="/financial/add">
+    <fieldset style="border:1px solid #ccc; padding:15px; margin-bottom:20px;">
+        <legend>اطلاعات تراکنش</legend>
+        
+        <label>مخاطب:</label><br>
+        <select name="contact" required style="width:100%; margin-bottom:10px;">
+            <option value="">-- انتخاب کنید --</option>
+            {% for c in contacts %}
+            <option value="{{ c.id }}">{{ c.name }}</option>
+            {% endfor %}
+        </select><br>
+        
+        <label>نوع تراکنش:</label><br>
+        <select name="transaction_type" required style="width:100%; margin-bottom:10px;">
+            <option value="receive">دریافت از مخاطب</option>
+            <option value="pay">پرداخت به مخاطب</option>
+        </select><br>
+        
+        <label>مبلغ (تومان):</label><br>
+        <input type="number" name="amount" required placeholder="فقط عدد مثبت وارد کنید" min="0" style="width:100%; margin-bottom:10px;"><br>
+        <small style="color:gray;">مبلغ را بدون علامت وارد کنید. نوع تراکنش را از بالا انتخاب کنید.</small>
+
+        <label>توضیحات (اختیاری):</label><br>
+        <textarea name="description" rows="2" style="width:100%; margin-bottom:10px;" placeholder="در صورت نیاز توضیحی وارد کنید..."></textarea><br>
+
+    </fieldset>
+    
+    <div style="text-align:center;">
+        <button type="submit" class="btn-add">💾 ثبت تراکنش</button>
+        <a href="/financial/view" class="btn-view">🔙 بازگشت</a>
+    </div>
+</form>
+{% endblock %}

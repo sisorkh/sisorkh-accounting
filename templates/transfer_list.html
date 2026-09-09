@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>🔄 لیست فاکتورهای جابجایی</h2>
+<a href="/transfer/add" class="btn-add">➕ ثبت جابجایی جدید</a>
+<table style="width:100%; margin-top:20px;">
+    <thead>
+        <tr><th>شماره</th><th>عنوان</th><th>انبار غیر</th><th>تاریخ</th><th>نهایی</th><th>اقلام</th><th>عملیات</th></tr>
+    </thead>
+    <tbody>
+        {% for t in transfers %}
+        <tr>
+            <td>{{ t.id|persian }}</td>
+            <td>{{ t.title }}</td>
+            <td>{{ t.source_warehouse|persian }}</td>
+            <td>{{ t.date_shamsi|persian }}</td>
+            <td>{% if t.status != 0 %}نهایی{% else %}پیش‌فاکتور{% endif %}</td>
+            <td>{{ t.items_count|persian }}</td>
+            <td><a href="/transfer/invoice/{{ t.id }}">مشاهده فاکتور</a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7">هیچ جابجایی ثبت نشده است. یک جابجایی جدید اضافه کنید.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

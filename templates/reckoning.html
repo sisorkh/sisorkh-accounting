@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>🧾 تسویه حساب با مخاطبان</h2>
+<div style="margin-bottom:20px;">
+    <button class="btn" id="filterAll">همه</button>
+    <button class="btn" id="filterCreditor">طلبکار (balance مثبت)</button>
+    <button class="btn" id="filterDebtor">بدهکار (balance منفی)</button>
+    <label>
+        <input type="checkbox" id="send-sms"> ارسال پیامک
+    </label>
+</div>
+
+<table style="width:100%; border-collapse:collapse; margin-top:10px;">
+    <thead>
+        <tr><th>نام مخاطب</th><th>تراز (تومان)</th><th>عملیات</th></tr>
+    </thead>
+    <tbody id="reckoningBody">
+        {% for c in contacts %}
+        <tr data-balance="{{ c.balance }}">
+            <td>{{ c.name }}</td>
+            <td style="direction: ltr; text-align: right; {% if c.balance > 0 %}color:green;{% elif c.balance < 0 %}color:red;{% endif %}">
+                {{ c.balance|format_number }}
+            </td>
+            <td>
+                {% if c.balance != 0 %}
+                <form method="post" action="{{ url_for('reckoning.settle_contact', contact_id=c.id) }}" style="display:inline;" onsubmit="return confirm('تسویه حساب با {{ c.name }} به مبلغ {{ c.balance|format_number }} تومان؟');">
+                    <button type="submit" class="btn-add">✅ تسویه</button>
+                </form>
+                {% else %}
+                <span style="color:gray;">---</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    const rows = document.querySelectorAll('#reckoningBody tr');
+    function filterTable(type) {
+        rows.forEach(row => {
+            const balance = parseFloat(row.getAttribute('data-balance'));
+            if (type === 'all') row.style.display = '';
+            else if (type === 'creditor' && balance > 0) row.style.display = '';
+            else if (type === 'debtor' && balance < 0) row.style.display = '';
+            else row.style.display = 'none';
+        });
+    }
+    document.getElementById('filterAll').addEventListener('click', () => filterTable('all'));
+    document.getElementById('filterCreditor').addEventListener('click', () => filterTable('creditor'));
+    document.getElementById('filterDebtor').addEventListener('click', () => filterTable('debtor'));
+
+    document.querySelectorAll('#reckoningBody form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const chk = document.getElementById('send-sms');
+            if (chk) {
+                // اگر قبلاً فیلد مشابه وجود نداشت، یک فیلد مخفی بسازید
+                let existing = form.querySelector('input[name="sms"]');
+                if (existing) existing.remove();
+                let input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'sms';
+                input.value = chk.checked ? '1' : '0';
+                form.appendChild(input);
+            }
+        });
+    });
+
+</script>
+{% endblock %}

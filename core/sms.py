@@ -5,8 +5,8 @@ url = 'https://rest.payamak-panel.com/api/SendSMS/SendSMS'
 
 def send_sms(send_to:str, send_text:str, send_from:str="XXXXXXXX") -> int:
     payload = {
-        'username': secret['sms_username]',
-        'password': secret['sms_password]',
+        'username': secret['sms_username'],
+        'password': secret['sms_password'],
         'to': send_to,
         'from': send_from,
         'text': send_text

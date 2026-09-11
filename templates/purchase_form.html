@@ -37,10 +37,10 @@
         <legend>کالاهای خریداری شده</legend>
         <div style="overflow-x:auto;">
             <table id="itemsTable" style="width:100%; border-collapse:collapse;">
-                <thead><tr><th>کالا</th><th>تعداد</th><th>قیمت واحد (تومان)</th><th>تخفیف (٪)</th><th>مجموع</th><th>عملیات</th></tr></thead>
+                <thead><tr><th>کالا</th><th>تعداد</th><th>قیمت واحد (تومان)</th><th>تخفیف (٪)</th><th>مجموع</th><th>نوبت چاپ جدید؟</th><th>عملیات</th></tr></thead>
                 <tbody id="itemsBody"></tbody>
                 <tfoot>
-                    <tr><td colspan="5"><button type="button" id="addItemBtn" class="btn-add">➕ افزودن کالا</button></td><td><span id="totalItemsAmount">0</span> تومان</td></tr>
+                    <tr><td colspan="6"><button type="button" id="addItemBtn" class="btn-add">➕ افزودن کالا</button></td><td><span id="totalItemsAmount">0</span> تومان</td></tr>
                 </tfoot>
             </table>
         </div>
@@ -93,6 +93,10 @@
             <td><input type="number" name="price[]" class="item-price" value="${priceVal || 0}" min="0" style="width:120px;"></td>
             <td><input type="number" name="discount[]" class="item-discount" value="0" min="0" max="100" step="1" style="width:80px;"></td>
             <td class="row-total" style="text-align:center;">0</td>
+            <td style="text-align:center;">
+                <input type="checkbox" class="item-newprint-cb" title="اگر تیک بخورد، یک نوبت چاپ تازه برای این کالا ساخته می‌شود؛ در غیر این صورت به نوبت چاپ فعلی این کالا اضافه می‌شود.">
+                <input type="hidden" name="new_print[]" class="item-newprint" value="0">
+            </td>
             <td><button type="button" class="remove-row" style="background:#a00; color:white; border:none; padding:5px 10px;">حذف</button></td>
         `;
         const goodsSelect = row.querySelector('.item-goods');
@@ -100,6 +104,12 @@
         const priceInput = row.querySelector('.item-price');
         const discountInput = row.querySelector('.item-discount');
         const removeBtn = row.querySelector('.remove-row');
+        const newPrintCb = row.querySelector('.item-newprint-cb');
+        const newPrintHidden = row.querySelector('.item-newprint');
+        
+        newPrintCb.addEventListener('change', () => {
+            newPrintHidden.value = newPrintCb.checked ? '1' : '0';
+        });
         
         goodsSelect.addEventListener('change', () => {
             const opt = goodsSelect.options[goodsSelect.selectedIndex];

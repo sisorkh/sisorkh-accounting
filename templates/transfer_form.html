@@ -49,7 +49,7 @@
 <script>
     const goodsData = [
         {% for g in goods %}
-        { id: {{ g.id }}, name: "{{ g.book_name }} (نوبت چاپ: {{ g.print_number }})", price: {{ g.sell_price }} },
+        { id: {{ g.id }}, name: "{{ g.book_name }}", price: {{ g.sell_price }} },
         {% endfor %}
     ];
     

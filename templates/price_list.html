@@ -38,7 +38,6 @@
                     {% elif item.cover == 2 %}شومیز قاب‌دار
                     {% elif item.cover == 3 %}گالینگور قاب‌دار
                     {% else %}نامشخص{% endif %}
-                    {{ item.print_number|persian }}
                 </td>
                 <td>
                     <input type="number" name="buy_price" value="{{ item.buy }}" class="buy-input" data-goods="{{ item.goods_id }}" style="width:120px;">

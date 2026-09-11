@@ -78,7 +78,7 @@
     
     const physicalGoods = [
         {% for g in physical_goods %}
-        { id: "{{ g.id }}", name: "{{ g.book_name }} (نوبت چاپ: {{ g.print_number }})", price: {{ g.sell_price }}, type: 0 },
+        { id: "{{ g.id }}", name: "{{ g.book_name }}", price: {{ g.sell_price }}, type: 0 },
         {% endfor %}
     ];
     const virtualGoods = [

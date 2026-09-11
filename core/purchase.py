@@ -54,11 +54,13 @@ def purchase_add():
         numbers = request.form.getlist('number[]')
         prices = request.form.getlist('price[]')
         discounts = request.form.getlist('discount[]')
+        new_prints = request.form.getlist('new_print[]')  # '1' یعنی این ردیف یک نوبت چاپ جدید است
         
         if not goods_ids:
             return "حداقل یک کالا باید انتخاب شود. <a href='/purchase/add'>بازگشت</a>"
         
         current_timestamp = int(time.time())
+        current_year = jdatetime.datetime.now().year
         
         # درج در جدول purchase
         cursor.execute('''
@@ -106,6 +108,19 @@ def purchase_add():
                 
                 # بروزرسانی تعداد کل چاپ‌شده در جدول goods
                 cursor.execute('UPDATE goods SET print = COALESCE(print, 0) + ? WHERE id = ?', (number, goods_id))
+                
+                # بروزرسانی نوبت‌های چاپ (prints)
+                is_new_print = (i < len(new_prints)) and new_prints[i] == '1'
+                cursor.execute('SELECT id, number FROM prints WHERE goods = ? ORDER BY number DESC LIMIT 1', (goods_id,))
+                last_print = cursor.fetchone()
+                if is_new_print or not last_print:
+                    next_number = (last_print['number'] + 1) if last_print else 1
+                    cursor.execute('''
+                        INSERT INTO prints (goods, number, tirage, year)
+                        VALUES (?, ?, ?, ?)
+                    ''', (goods_id, next_number, number, current_year))
+                else:
+                    cursor.execute('UPDATE prints SET tirage = tirage + ? WHERE id = ?', (number, last_print['id']))
 
         if final and total:
             if register_payment:
@@ -138,7 +153,6 @@ def purchase_add():
             SELECT g.id, b.name as book_name, g.isbn, g.size
             FROM goods g
             JOIN book b ON g.book = b.id
-            WHERE g.status = 1
             ORDER BY b.name
         ''')
         goods_list = cursor.fetchall()

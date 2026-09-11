@@ -56,8 +56,7 @@
                         {{ item.book_name }}{% if item.book_second %} ({{ item.book_second }}){% endif %}
                         <div class="product-details">
                             {% if item.size == 0 %}رقعی{% elif item.size == 1 %}جیبی{% elif item.size == 2 %}پالتویی{% elif item.size == 3 %}وزیری{% elif item.size == 4 %}رحلی{% elif item.size == 5 %}نقلی{% elif item.size == 6 %}خشتی{% else %}نامشخص{% endif %} |
-                            {% if item.cover == 0 %}شومیز{% elif item.cover == 1 %}گالینگور{% elif item.cover == 2 %}شومیز قاب‌دار{% elif item.cover == 3 %}گالینگور قاب‌دار{% else %}نامشخص{% endif %} |
-                            چاپ {{ item.print_number|persian }}
+                            {% if item.cover == 0 %}شومیز{% elif item.cover == 1 %}گالینگور{% elif item.cover == 2 %}شومیز قاب‌دار{% elif item.cover == 3 %}گالینگور قاب‌دار{% else %}نامشخص{% endif %}
                         </div>
                     </td>
                     <td>{{ item.number|persian }}</td>

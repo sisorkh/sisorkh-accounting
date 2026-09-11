@@ -6,7 +6,7 @@
 <table style="width:100%; margin-top:20px; border-collapse:collapse;">
     <thead>
         <tr>
-            <th>کد</th><th>عنوان</th><th>شابک</th><th>مشخصات</th><th>نوبت</th><th>سال</th><th>چاپ</th><th>فروش</th><th>وضعیت</th><th>عملیات</th>
+            <th>کد</th><th>عنوان</th><th>شابک</th><th>مشخصات</th><th>آخرین نوبت چاپ</th><th>تیراژ آخرین نوبت</th><th>مجموع چاپ</th><th>فروش</th><th>عملیات</th>
         </tr>
     </thead>
     <tbody>
@@ -31,11 +31,10 @@
                 {% elif g.size == 6 %}خشتی
                 {% else %}نامشخص{% endif %}
             </td>
-            <td>{{ g.number|persian }}</td>
-            <td>{{ g.year|persian }}</td>
+            <td>{{ g.last_print_number|persian if g.last_print_number else '-' }}</td>
+            <td>{{ g.last_print_tirage|persian if g.last_print_tirage else '-' }}</td>
             <td>{{ g.print|persian }}</td>
             <td>{{ g.sold|persian }}</td>
-            <td>{% if g.status == 1 %}فعال{% else %}غیرفعال{% endif %}</td>
             <td><a href="#">جزئیات (بعداً)</a></td>
         </tr>
         {% else %}

@@ -166,7 +166,7 @@ def price_list():
         # GET: نمایش لیست قیمت‌ها با فیلدهای جدید
         cursor.execute('''
             SELECT l.id, l.goods, l.buy, l.sell, l.date, l.sku,
-                   g.id as goods_id, g.isbn, g.number as print_number, g.cover, g.size,
+                   g.id as goods_id, g.isbn, g.cover, g.size,
                    b.name as book_name, b.second as book_second
             FROM list l
             JOIN goods g ON l.goods = g.id
@@ -186,7 +186,6 @@ def price_list():
                 'isbn': row['isbn'],
                 'size': row['size'],
                 'cover': row['cover'],
-                'print_number': row['print_number'],
                 'buy': row['buy'],
                 'sell': row['sell'],
                 'sku': row['sku'] or 0,

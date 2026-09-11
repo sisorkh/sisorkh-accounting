@@ -266,12 +266,11 @@ def sales_add():
         ''')
         warehouses = cursor.fetchall()
         cursor.execute('''
-            SELECT g.id, b.name as book_name, g.number as print_number,
+            SELECT g.id, b.name as book_name,
                 COALESCE(l.sell, 0) as sell_price, 0 as type
             FROM goods g
             JOIN book b ON g.book = b.id
             LEFT JOIN list l ON l.goods = g.id
-            WHERE g.status = 1
             ORDER BY b.name
         ''')
         physical_goods = cursor.fetchall()
@@ -318,7 +317,7 @@ def sales_invoice(invoice_id):
     
     cursor.execute('''
         SELECT d.id, d.number, d.price, d.discount, d.type,
-               g.id as goods_id, g.number as print_number, g.cover, g.size,
+               g.id as goods_id, g.cover, g.size,
                b.name as book_name, b.second as book_second
         FROM sales_details d
         LEFT JOIN goods g ON d.goods = g.id

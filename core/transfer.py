@@ -125,12 +125,11 @@ def transfer_add():
         warehouses = cursor.fetchall()
         # کالاها با نوبت چاپ و قیمت فروش
         cursor.execute('''
-            SELECT g.id, b.name as book_name, g.number as print_number, 
+            SELECT g.id, b.name as book_name,
                    COALESCE(l.sell, 0) as sell_price
             FROM goods g
             JOIN book b ON g.book = b.id
             LEFT JOIN list l ON l.goods = g.id
-            WHERE g.status = 1
             ORDER BY b.name
         ''')
         goods_list = cursor.fetchall()
@@ -154,7 +153,7 @@ def transfer_invoice(transfer_id):
     # اقلام به همراه قطع، جلد، نوبت چاپ
     cursor.execute('''
         SELECT td.id, td.number, td.price, td.discount,
-               g.id as goods_id, g.number as print_number, g.cover, g.size,
+               g.id as goods_id, g.cover, g.size,
                b.name as book_name, b.second as book_second
         FROM transfer_details td
         JOIN goods g ON td.goods = g.id

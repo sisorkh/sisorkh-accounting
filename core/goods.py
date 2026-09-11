@@ -1,6 +1,5 @@
 from core.database import db_manager
 from flask import render_template, request, Blueprint
-from libraries import jdatetime
 import isbnlib
 
 goods_bp = Blueprint('goods', __name__, url_prefix='/goods')
@@ -11,9 +10,13 @@ def goods_view():
     cursor = conn.cursor()
     # نمایش کالاها همراه با نام کتاب
     cursor.execute('''
-        SELECT g.id, b.name as book_name, g.isbn, g.cover, g.size, g.number, g.tirage, g.page, g.weight, g.year, g.status, g.sold, g.print
+        SELECT g.id, b.name as book_name, g.isbn, g.cover, g.size, g.page, g.weight, g.sold, g.print,
+               p.number as last_print_number, p.tirage as last_print_tirage, p.year as last_print_year
         FROM goods g
         JOIN book b ON g.book = b.id
+        LEFT JOIN prints p ON p.id = (
+            SELECT id FROM prints WHERE goods = g.id ORDER BY number DESC LIMIT 1
+        )
         ORDER BY g.id DESC
     ''')
     goods_list = cursor.fetchall()
@@ -31,11 +34,8 @@ def goods_add():
         isbn = request.form.get('isbn', '').strip()
         cover = request.form.get('cover')
         size = request.form.get('size')
-        number = request.form.get('number') or None
-        tirage = request.form.get('tirage') or None
         page = request.form.get('page') or None
         weight = request.form.get('weight') or None
-        year = request.form.get('year')
         
         # اعتبارسنجی ISBN (اگر خالی نباشد)
         if isbn:
@@ -44,15 +44,14 @@ def goods_add():
                 return "خطا: شابک وارد شده معتبر نیست (باید 13 رقمی باشد). <a href='/goods/add'>بازگشت</a>"
         
         # مقداردهی پیش‌فرض
-        status = 1
         sold = 0
-        print = 0
+        goods_print = 0
         
         # درج در دیتابیس
         cursor.execute('''
-            INSERT INTO goods (book, isbn, cover, size, number, tirage, page, weight, year, status, sold, print)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (book_id, isbn, cover, size, number, tirage, page, weight, year, status, sold, print))
+            INSERT INTO goods (book, isbn, cover, size, page, weight, sold, print)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (book_id, isbn, cover, size, page, weight, sold, goods_print))
         
         conn.commit()
         conn.close()
@@ -63,5 +62,4 @@ def goods_add():
         cursor.execute('SELECT id, name, second FROM book ORDER BY name')
         books = cursor.fetchall()
         conn.close()
-        default_year = jdatetime.datetime.now().year
-        return render_template('goods_form.html', books=books, default_year=default_year)
+        return render_template('goods_form.html', books=books)
